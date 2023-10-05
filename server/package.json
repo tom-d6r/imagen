@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc -w & nodemon ./dist/index.js"
+    "start": "tsc -w & nodemon ./dist/index.js",
+    "build": "node ./dist/index.js"
   },
   "type": "module",
   "keywords": [],
