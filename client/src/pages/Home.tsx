@@ -1,23 +1,83 @@
-import { useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Card, FormField } from "../components";
 
 interface Post {
-  _id: number;
+  _id: string;
+  name: string;
+  prompt: string;
+  photo: string;
 }
 
-const RenderCards = ({ data, title }: { data: Post[]; title: string }) => {
-  if (data?.length > 0)
-    return data.map((post) => <Card key={post._id} {...post} />);
+const RenderCards = ({
+  data,
+  title,
+}: {
+  data: Post[] | null;
+  title: string;
+}) => {
+  if (data && data.length > 0)
+    return data.map((post) => (
+      <Card
+        key={post._id}
+        _id={post._id}
+        name={post.name}
+        prompt={post.prompt}
+        photo={post.photo}
+      />
+    ));
 
-  return (
-    <h2 className="mt-5 font-bold text-[#6449ff] text-xl uppercase">{title}</h2>
-  );
+  return <h2 className="mt-5 font-bold text-[#6449ff] text-xl">{title}</h2>;
 };
 
 function Home() {
   const [loading, setLoading] = useState(false);
-  const [allPosts, setAllPosts] = useState(null);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [searchResults, setSearchResults] = useState<Post[]>([]);
+  const [searchTimeout, setSearchTimeout] = useState(-1);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      setLoading(true);
+
+      try {
+        const response = await fetch("http://localhost:3000/api/v1/posts", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setAllPosts(result.data.reverse());
+        }
+      } catch (err) {
+        alert(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
+
+  const handleSearchChange = (e: FormEvent) => {
+    clearTimeout(searchTimeout);
+    const target = e.target as HTMLInputElement;
+    setSearchText(target.value);
+
+    setSearchTimeout(
+      setTimeout(() => {
+        const matches = allPosts.filter(
+          (item) =>
+            item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+            item.prompt.toLowerCase().includes(searchText.toLowerCase())
+        );
+
+        setSearchResults(matches);
+      }, 500)
+    );
+  };
 
   return (
     <section className="max-w-7xl mx-auto">
@@ -30,7 +90,14 @@ function Home() {
       </div>
 
       <div className="mt-16">
-        <FormField />
+        <FormField
+          labelName="Search posts"
+          type="text"
+          name="search"
+          placeholder="Search posts"
+          value={searchText}
+          handleChange={handleSearchChange}
+        />
       </div>
 
       <div className="mt-10">
@@ -46,9 +113,9 @@ function Home() {
             )}
             <div className="grid lg:grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 grid-cols-1 gap-3">
               {searchText ? (
-                <RenderCards data={[]} title="No results found" />
+                <RenderCards data={searchResults} title="No results found" />
               ) : (
-                <RenderCards data={[]} title="No posts found" />
+                <RenderCards data={allPosts} title="No posts found" />
               )}
             </div>
           </>

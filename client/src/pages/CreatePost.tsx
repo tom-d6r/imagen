@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { Form, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getRandomPrompt } from "../utils";
 import { FormField } from "../components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -16,8 +16,31 @@ function CreatePost() {
   const [generatingImg, setGeneratingImg] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
-    return;
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    if (form.prompt && form.photo) {
+      setLoading(true);
+
+      try {
+        const response = await fetch("http://localhost:3000/api/v1/posts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        });
+
+        await response.json();
+        navigate("/");
+      } catch (err) {
+        alert(err);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      alert("Please enter a prompt");
+    }
   };
 
   const handleChange = (e: FormEvent) => {
@@ -32,7 +55,31 @@ function CreatePost() {
     return;
   };
 
-  const generateImg = () => {
+  const generateImg = async () => {
+    if (form.prompt) {
+      try {
+        setGeneratingImg(true);
+        const response = await fetch("http://localhost:3000/api/v1/dalle/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt: form.prompt }),
+        });
+
+        const data = await response.json();
+        console.log(response);
+        console.log(data);
+
+        setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setGeneratingImg(false);
+      }
+    } else {
+      alert("Please enter a prompt");
+    }
     return;
   };
 
