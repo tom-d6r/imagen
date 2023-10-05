@@ -1,8 +1,8 @@
 export const surpriseMePrompts = [
-  "a giraffe lying in bed reading a book about giraffes",
-  "a polaroid of the mona lisa smiling",
-  "a moon fighting a sun",
-  "seven snow-whites around a dwarf sleeping",
-  "frodo dancing with an orc",
-  "a happy octopus wearing a lot of jewelry",
+  "A giraffe lying in bed reading a book about giraffes",
+  "A polaroid of the Mona Lisa smiling",
+  "A moon fighting a sun",
+  "Seven snow-whites around a sleeping dwarf",
+  "Frodo dancing with an orc",
+  "A happy octopus wearing a lot of jewelry",
 ];
